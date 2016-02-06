@@ -1,2 +1,4 @@
-# subresource-integrity
+# Subresource Integrity
 Verify that HTML script and link resources have not been modified.
+
+http://softwareaddictionshow.github.io/subresource-integrity
