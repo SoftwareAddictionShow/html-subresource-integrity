@@ -5,6 +5,13 @@ body {
     font-family: Helvetica, Arial, sans-serif;
 }
 
+.good {
+    background-color: lime;
+}
+
+.bad {
+    background-color: pink;
+}
 
 /* Ribbon from:
 https://codepo8.github.io/css-fork-on-github-ribbon/
