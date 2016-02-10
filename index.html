@@ -31,6 +31,10 @@ https://github.com/SoftwareAddictionShow/html-subresource-integrity
 		</code></pre>
 
 		<p>
+			Browser supports subresource integrity: <span id="hasNativeIntegrityCheck"></span>
+		</p>
+
+		<p>
 			<button id="loadGood">Load script with good integrity</button><span id="statusGood"></span>
 		</p>
 
@@ -134,5 +138,9 @@ https://github.com/SoftwareAddictionShow/html-subresource-integrity
 				},
 			integrity);
 		});
+
+		var has_integrity = HTMLScriptElement.prototype.hasOwnProperty('integrity');
+		var integrity = document.querySelector('#hasNativeIntegrityCheck');
+		integrity.innerHTML = has_integrity;
 	</script>
 </html>
