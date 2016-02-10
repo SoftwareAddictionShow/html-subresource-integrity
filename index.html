@@ -6,6 +6,10 @@ https://github.com/SoftwareAddictionShow/html-subresource-integrity
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title>Subresource Integrity</title>
+		<script type="text/javascript" src="js/jsSHA/sha.js"></script>
+		<script type="text/javascript" src="js/jsSHA/sha1.js"></script>
+		<script type="text/javascript" src="js/jsSHA/sha256.js"></script>
+		<script type="text/javascript" src="js/jsSHA/sha512.js"></script>
 		<link type="text/css" href="styles.css" media="screen" rel="Stylesheet" />
 		<link href="themes/obsidian.css" rel="stylesheet" type="text/css" media="screen" />
 	</head>
@@ -50,36 +54,85 @@ https://github.com/SoftwareAddictionShow/html-subresource-integrity
 	<script src="js/rainbow.js"></script>
 	<script src="js/language/html.js"></script>
 	<script>
+		function httpRequest(url, method, cb, timeout) {
+			timeout = timeout || 3000;
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function() {
+				if (this.readyState === 4) {
+					cb(this.response, this.status);
+				} else if (this.readyState === 0) {
+					cb(null);
+				}
+			};
+			xhr.onerror = function() {
+				cb(null);
+			};
+			xhr.open(method, url, true);
+			xhr.timeout = timeout;
+			xhr.send(null);
+		}
+
+		function loadScript(url, cb_load, cb_error, integrity) {
+			httpRequest(url, 'GET', function(response, status) {
+				if (status === 200) {
+					var script = document.createElement('script');
+					document.head.appendChild(script);
+					script.setAttribute('crossorigin', 'anonymous');
+
+					if (integrity) {
+						if (! HTMLScriptElement.prototype.hasOwnProperty('integrity')) {
+							var sha_obj = new jsSHA('SHA-384', 'TEXT');
+							sha_obj.update(response);
+							var hash = 'sha384-' + sha_obj.getHash('B64');
+							if (hash === integrity) {
+								cb_load();
+							} else {
+								cb_error();
+							}
+						} else {
+							script.onload = function() {
+								cb_load();
+							};
+							script.onerror = function(e) {
+								cb_error(e);
+							};
+							script.setAttribute('integrity', integrity);
+						}
+					}
+
+					script.src = url;
+				}
+			});
+		}
+
 		document.querySelector('#loadGood').addEventListener('click', function() {
-			var script = document.createElement('script');
-			document.head.appendChild(script);
-			script.onload = function() {
-				document.querySelector('#statusGood').innerHTML = 'Loaded ' + this.src;
-				document.querySelector('#statusGood').classList.add('good');
-			};
-			script.onerror = function(e) {
-				document.querySelector('#statusGood').innerHTML = 'Failed to load ' + this.src;
-				document.querySelector('#statusGood').classList.add('bad');
-			};
-			script.setAttribute('crossorigin', "anonymous");
-			script.setAttribute('integrity', "sha384-YBgalm8SLGVeEQrCdsEB9HYQQ/aQMkdH4SqO/KepvPzYtbUUCI8l5wpxFzIfD/6Y");
-			script.src = "https://ajax.googleapis.com/ajax/libs/threejs/r69/three.min.js";
+			var src = "https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js";
+			var integrity = "sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk";
+			loadScript(src,
+				function() {
+					document.querySelector('#statusGood').innerHTML = 'Loaded ' + src;
+					document.querySelector('#statusGood').classList.add('good');
+				},
+				function(e) {
+					document.querySelector('#statusGood').innerHTML = 'Failed to load ' + src;
+					document.querySelector('#statusGood').classList.add('bad');
+				},
+			integrity);
 		});
 
 		document.querySelector('#loadBad').addEventListener('click', function() {
-			var script = document.createElement('script');
-			document.head.appendChild(script);
-			script.onload = function() {
-				document.querySelector('#statusBad').innerHTML = 'Loaded ' + this.src;
-				document.querySelector('#statusBad').classList.add('good');
-			};
-			script.onerror = function(e) {
-				document.querySelector('#statusBad').innerHTML = 'Failed to load ' + this.src;
-				document.querySelector('#statusBad').classList.add('bad');
-			};
-			script.setAttribute('crossorigin', "anonymous");
-			script.setAttribute('integrity', "sha384-baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaad");
-			script.src = "https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js";
+			var src = "https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js";
+			var integrity = "sha384-baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaad";
+			loadScript(src,
+				function() {
+					document.querySelector('#statusBad').innerHTML = 'Loaded ' + src;
+					document.querySelector('#statusBad').classList.add('good');
+				},
+				function(e) {
+					document.querySelector('#statusBad').innerHTML = 'Failed to load ' + src;
+					document.querySelector('#statusBad').classList.add('bad');
+				},
+			integrity);
 		});
 	</script>
 </html>
